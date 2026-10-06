@@ -112,7 +112,44 @@ def cmd_backtest(a: argparse.Namespace) -> None:
     print((out / f"backtest_{a.target_window}.md").read_text(encoding="utf-8"))
 
 
+def field_rows(entries: list[dict]) -> list[dict]:
+    rows = []
+    for e in entries:
+        res = (e.get("prediction") or {}).get("result") or {}
+        top = (res.get("verdicts") or [None])[0]
+        c = e.get("checkin") or {}
+        rows.append({"date": e["date"], "probability": res.get("probability"),
+                     "top": f"{top['excuse']} {top['verdict']}" if top else None,
+                     "went": c.get("went"), "minutes": c.get("minutes"), "steps": c.get("steps"), "note": c.get("note")})
+    return rows
+
+
+def cmd_demo(a: argparse.Namespace) -> None:
+    p = prepare(Path(a.export), a.city, a.freeze)
+    history = p["days"][RAW_DAY_FIELDS].astype(object).where(p["days"][RAW_DAY_FIELDS].notna(), None).to_dict("records")
+    request = {"history": history[-1000:], "today": p["today_raw"], "claimed_excuse": a.claimed}
+    response = run_verdict(request["history"], request["today"], a.claimed)
+    window = good_window(p["profile"], hours_for(p["hourly"], a.freeze), 8) if p["profile"] else None
+    bt = Path("eval/backtest_28.json")
+    bundle = {"label": a.label, "frozen_on": a.freeze, "request": request, "response": response,
+              "window": list(window) if window else None,
+              "backtest": json.loads(bt.read_text(encoding="utf-8")) if bt.exists() else None,
+              "field": field_rows(field.entries())}
+    out = Path(a.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(bundle), encoding="utf-8")
+    print(f"wrote {out} ({out.stat().st_size // 1024} KB)")
+
+
 def _extra_commands(sub) -> None:
+    d = sub.add_parser("demo", help="write web/public/demo.json")
+    d.add_argument("--export", required=True)
+    d.add_argument("--city", required=True)
+    d.add_argument("--freeze", required=True)
+    d.add_argument("--claimed", choices=["heat", "rain", "air", "workday", "tired"])
+    d.add_argument("--label", default="Demo · Aniruddh's real 2026")
+    d.add_argument("--out", default="web/public/demo.json")
+    d.set_defaults(fn=cmd_demo)
     b = sub.add_parser("backtest", help="expanding-window backtest vs baselines")
     b.add_argument("--export", required=True)
     b.add_argument("--city", required=True)
