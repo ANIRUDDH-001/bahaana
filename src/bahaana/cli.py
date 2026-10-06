@@ -11,7 +11,7 @@ from bahaana import field
 from bahaana.days import add_days, build_days, today_raw
 from bahaana.engine import run_verdict
 from bahaana.ingest import hourly_profile, read_export
-from bahaana.schema import RAW_DAY_FIELDS
+from bahaana.schema import MAX_HISTORY_ROWS, RAW_DAY_FIELDS
 from bahaana.weather import (aggregate_daily, aggregate_pm25, fetch_pm25_hourly, fetch_weather_hourly, geocode,
                              hours_for)
 from bahaana.window import good_window
@@ -23,17 +23,23 @@ def history_end(export_last_day: str, today: str) -> str:
 
 
 def usable_steps(daily: dict[str, float], checkins: dict[str, float], today: str) -> dict[str, float]:
-    """The export's last day is the day it was taken, so it is partial: drop it unless a check-in supplies it."""
+    """The export's last day is the day it was taken, so it is partial: drop it unless a check-in supplies it.
+    Complete export days win over check-ins, which may have been typed before the day was over."""
     export = {d: v for d, v in daily.items() if d != max(daily)} if daily else {}
-    steps = {**export, **checkins}
+    steps = {**checkins, **export}
     return {d: v for d, v in steps.items() if d < today}
+
+
+def history_start(steps: dict[str, float], today: str) -> str:
+    """At most MAX_HISTORY_ROWS days of history: older days can't be sent and have no archived forecasts."""
+    return max(min(steps), add_days(today, -MAX_HISTORY_ROWS))
 
 
 def prepare(export: Path, city: str, today: str) -> dict:
     data = read_export(export)
     steps = usable_steps(data.daily, field.checkin_steps(), today)
     geo = geocode(city)
-    start, end = min(steps), history_end(max(data.daily), today)
+    start, end = history_start(steps, today), history_end(max(data.daily), today)
     hourly = fetch_weather_hourly(geo["lat"], geo["lon"], geo["timezone"], start, today)
     pm = aggregate_pm25(fetch_pm25_hourly(geo["lat"], geo["lon"], geo["timezone"], start, end))
     weather = aggregate_daily(hourly)
