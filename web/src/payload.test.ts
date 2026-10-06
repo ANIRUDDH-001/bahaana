@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRequest, usableSteps } from "./payload";
+import { buildRequest, historyProblem, historyStart, usableSteps } from "./payload";
 import { parseDailyCsv } from "./takeout";
 
 describe("buildRequest", () => {
@@ -43,4 +43,17 @@ describe("usableSteps (mirrors cli.usable_steps)", () => {
     expect(usableSteps(daily, {}, "2026-10-07")).toEqual({ "2026-10-04": 9000, "2026-10-05": 8000 }));
   it("lets a check-in supply that day", () => expect(usableSteps(daily, { "2026-10-06": 7400 }, "2026-10-08")["2026-10-06"]).toBe(7400));
   it("never includes today", () => expect(usableSteps(daily, { "2026-10-07": 5000 }, "2026-10-07")["2026-10-07"]).toBeUndefined());
+  it("lets a complete export day win over a check-in", () => expect(usableSteps(daily, { "2026-10-04": 3100 }, "2026-10-07")["2026-10-04"]).toBe(9000));
+});
+
+describe("history limits", () => {
+  it("starts at most 1000 days before today (mirrors cli.history_start)", () => {
+    expect(historyStart({ "2014-03-01": 5000, "2026-10-01": 6000 }, "2026-10-07")).toBe("2024-01-11");
+    expect(historyStart({ "2026-01-01": 5000 }, "2026-10-07")).toBe("2026-01-01");
+  });
+  it("explains a history that is too short before calling the server", () => {
+    const short = buildRequest({ "2026-08-01": 5000 }, {}, {}, "2026-09-28", null); // 58 days
+    expect(historyProblem(short)).toBe("Bahaana needs at least two months of steps.");
+    expect(historyProblem(buildRequest({ "2026-07-01": 5000 }, {}, {}, "2026-09-28", null))).toBeNull();
+  });
 });

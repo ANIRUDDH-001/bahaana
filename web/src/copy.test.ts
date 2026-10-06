@@ -10,6 +10,7 @@ describe("copy", () => {
   it("handles an excuse that never happened", () => {
     const never = v({ excuse: "air", sensitivity_pts: null, verdict: "UNCLEAR", evidence: { n_present: 0, k_present: 0, n_absent: 200, k_absent: 60, diff_ci: null, ci_method: "7-day block bootstrap" } });
     expect(evidenceLine(never)).toContain("No bad-air days");
+    expect(evidenceLine(never)).toContain("modelled (CAMS)"); // Global Constraint: PM2.5 is always "modelled (CAMS)"
     expect(sensitivityLine(never)).toContain("nothing to compare");
   });
   it("words sensitivity in points", () => expect(sensitivityLine(v({ sensitivity_pts: -12.4 }))).toBe("Today, this excuse lowers the model's likelihood by 12.4 points."));
