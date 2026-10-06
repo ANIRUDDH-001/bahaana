@@ -1,0 +1,4 @@
+{
+  "2026-07-01": {"feels_max": 35.5, "rain_mm": 2.5, "rain_hours": 2, "wind_max": 12.5, "cloud_mean": 70.0},
+  "2026-07-02": {"feels_max": null, "rain_mm": 0.05, "rain_hours": 0, "wind_max": 4.0, "cloud_mean": 50.5}
+}
