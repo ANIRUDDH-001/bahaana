@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: bahaana-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python scripts/fetch_model.py
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT --no-access-log
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: PYTHONPATH
+        value: src:.
+      - key: TABPFN_MODEL_CACHE_DIR
+        value: /opt/render/project/src/models
+      - key: FRONTEND_ORIGIN
+        sync: false
+  - type: web
+    name: bahaana
+    runtime: static
+    buildCommand: cd web && npm ci && npm run build
+    staticPublishPath: web/dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
