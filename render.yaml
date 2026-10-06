@@ -15,6 +15,13 @@ services:
         value: /opt/render/project/src/models
       - key: FRONTEND_ORIGIN
         sync: false
+      # 0.1 CPU and 512 MB: extra threads and malloc arenas only add memory
+      - key: OMP_NUM_THREADS
+        value: "1"
+      - key: MKL_NUM_THREADS
+        value: "1"
+      - key: MALLOC_ARENA_MAX
+        value: "2"
   - type: web
     name: bahaana
     runtime: static
