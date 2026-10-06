@@ -3,6 +3,7 @@ import { esc, percent, stampClass, windowText } from "../render";
 import { KEYS, save } from "../store";
 import type { AppState, Go } from "../state";
 import type { Today } from "../types";
+import type { Run } from "../checkin";
 
 function forecastLine(t: Today | undefined): string {
   if (!t) return "";
@@ -42,6 +43,11 @@ export function renderToday(s: AppState): string {
   </section>`;
 }
 
-export function bindToday(_s: AppState, go: Go): void {
-  document.getElementById("go")!.addEventListener("click", () => { save(KEYS.away, Date.now()); go("/away"); });
+export function bindToday(s: AppState, go: Go): void {
+  document.getElementById("go")!.addEventListener("click", () => {
+    const run: Run = { date: s.day ?? "", tz: s.tz ?? Intl.DateTimeFormat().resolvedOptions().timeZone, mode: s.mode };
+    save(KEYS.run, run);
+    save(KEYS.away, Date.now());
+    go("/away");
+  });
 }

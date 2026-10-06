@@ -1,7 +1,7 @@
 import { postVerdict, hasApi } from "../api";
 import { hourIn, todayIn, addDays } from "../dates";
-import { EXCUSE_LABEL } from "../copy";
-import { buildRequest, usableSteps } from "../payload";
+import { EXCUSE_LABEL, PRIVACY_LINES } from "../copy";
+import { buildRequest, historyProblem, historyStart, usableSteps } from "../payload";
 import { esc, stampClass } from "../render";
 import { KEYS, load, save } from "../store";
 import { hourlyProfile, readExport, type StepsData } from "../takeout";
@@ -24,10 +24,11 @@ export function renderStart(s: AppState): string {
     <p class="lede">Bahaana reads your own step history, tries your usual excuses against it, then gets out of your way.</p>
     ${sample ? `<p class="specimen" aria-hidden="true"><span>${EXCUSE_LABEL[sample.excuse]}</span><span class="${stampClass(sample.verdict)}">${sample.verdict}</span></p>` : ""}
     <a class="btn btn--primary" href="#/today" ${s.response ? "" : "aria-disabled=true"}>See my real year (demo)</a>
+    ${s.demoMissing ? `<p class="fine">The demo year isn't published on this site yet. You can still use your own export below.</p>` : ""}
   </section>
   <section class="card">
     <h2>Use your Google Fit export</h2>
-    <p class="fine">Opened in this browser. The file is never uploaded.</p>
+    <p class="fine">${esc(PRIVACY_LINES[0])}</p>
     <form id="live" class="form">
       <label>Takeout .zip (or a date,steps CSV)<input name="file" type="file" accept=".zip,.csv" ${cached ? "" : "required"}></label>
       ${cached ? `<p class="fine">Using the steps saved in this browser. Pick a file to replace them.</p>` : ""}
@@ -61,17 +62,20 @@ export function bindStart(_s: AppState, go: Go): void {
       const field = load<Record<string, { steps: number | null }>>(KEYS.field, {});
       const checkins = Object.fromEntries(Object.entries(field).filter(([, v]) => v.steps !== null).map(([d, v]) => [d, v.steps as number]));
       const daily = usableSteps(data.daily, checkins, today);
-      const start = Object.keys(daily).sort()[0];
-      if (!start) throw new Error("No step history found before today.");
+      if (!Object.keys(daily).length) throw new Error("No step history found before today.");
+      const start = historyStart(daily, today);
       say("Fetching the forecasts that were made for each day…");
       const hourly = await fetchWeatherHourly(g.lat, g.lon, g.timezone, start, today);
       const pm = aggregatePm25(await fetchPm25Hourly(g.lat, g.lon, g.timezone, start, addDays(today, -1)));
-      const req = buildRequest(daily, aggregateDaily(hourly), pm, today, claimed);
+      const recent = Object.fromEntries(Object.entries(daily).filter(([d]) => d >= start));
+      const req = buildRequest(recent, aggregateDaily(hourly), pm, today, claimed);
+      const problem = historyProblem(req);
+      if (problem) throw new Error(problem);
       say("Waking the model. It runs on a free server that naps, so this can take a minute or two…");
       const res = await postVerdict(req);
       const profile = hourlyProfile(data.perDayHours, data.daily);
       const win = profile ? goodWindow(profile, hoursFor(hourly, today), hourIn(g.timezone)) : null;
-      setLive(req, res, win, g.name);
+      setLive(req, res, win, g.name, today, g.timezone);
       go("/today");
     } catch (e) {
       say(`${(e as Error).message} The demo is still one tap away.`);
