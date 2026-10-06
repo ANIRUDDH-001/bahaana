@@ -7,12 +7,26 @@ const MAX_ROWS = 1000;
 const EMPTY: DailyWeather = { feels_max: null, rain_mm: null, rain_hours: null, wind_max: null, cloud_mean: null };
 const pick = (w?: DailyWeather): DailyWeather => (w ? { feels_max: w.feels_max, rain_mm: w.rain_mm, rain_hours: w.rain_hours, wind_max: w.wind_max, cloud_mean: w.cloud_mean } : { ...EMPTY });
 
-/** Mirrors cli.usable_steps: the export's last day is the day it was taken (partial), unless a check-in supplies it. */
+const MIN_ROWS = 60;
+
+/** Mirrors cli.usable_steps: the export's last day is the day it was taken (partial), unless a check-in supplies it.
+ *  Complete export days win over check-ins. */
 export function usableSteps(daily: Record<string, number>, checkins: Record<string, number>, today: string): Record<string, number> {
   const last = Object.keys(daily).sort().at(-1);
-  const steps: Record<string, number> = { ...Object.fromEntries(Object.entries(daily).filter(([d]) => d !== last)), ...checkins };
+  const steps: Record<string, number> = { ...checkins, ...Object.fromEntries(Object.entries(daily).filter(([d]) => d !== last)) };
   return Object.fromEntries(Object.entries(steps).filter(([d]) => d < today));
 }
+
+/** Mirrors cli.history_start: at most MAX_ROWS days, so old exports never ask for unarchived forecasts. */
+export function historyStart(daily: Record<string, number>, today: string): string {
+  const first = Object.keys(daily).sort()[0];
+  const floor = addDays(today, -MAX_ROWS);
+  return first > floor ? first : floor;
+}
+
+/** Spec §13: a readable message before waking the server for a history it would reject. */
+export const historyProblem = (req: VerdictRequest): string | null =>
+  req.history.length < MIN_ROWS ? "Bahaana needs at least two months of steps." : null;
 
 export function buildRequest(daily: Record<string, number>, weather: Record<string, DailyWeather>,
   pm25: Record<string, number | null>, todayDate: string, claimed: ExcuseId | null): VerdictRequest {

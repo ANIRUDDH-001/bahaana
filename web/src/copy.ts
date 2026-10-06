@@ -3,7 +3,7 @@ import type { ExcuseId, Verdict } from "./types";
 
 export const EXCUSE_LABEL: Record<ExcuseId, string> = { heat: "Too hot", rain: "Raining", air: "Bad air", workday: "Workday", tired: "Still tired" };
 const GROUPS: Record<ExcuseId, [string, string]> = {
-  heat: ["hot days", "cooler days"], rain: ["rainy days", "dry days"], air: ["bad-air days (modelled PM2.5)", "cleaner days"],
+  heat: ["hot days", "cooler days"], rain: ["rainy days", "dry days"], air: ["bad-air days (PM2.5 modelled (CAMS))", "cleaner days"],
   workday: ["workdays", "days off"], tired: ["days after a big day", "other days"],
 };
 export const TIRED_NOTE = "Your 'still tired' excuse is represented by an unusually active yesterday.";
