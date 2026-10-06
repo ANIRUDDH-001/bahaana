@@ -20,3 +20,8 @@ def test_tabpfn_v2_learns_a_simple_rule():
     p = model.predict_proba(X.iloc[100:])
     assert p.shape == (20,)
     assert ((p > 0.5).astype(int) == y.iloc[100:].to_numpy()).mean() >= 0.8
+
+
+def test_classifier_saves_memory_to_fit_the_512_mb_free_server():
+    from bahaana.model import make_classifier
+    assert make_classifier().get_params()["memory_saving_mode"] is True

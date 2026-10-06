@@ -26,6 +26,7 @@ def make_classifier():
         device="cpu",
         categorical_features_indices=[WEEKDAY_IDX],
         random_state=0,
+        memory_saving_mode=True,  # same predictions, lower peak: Render free tier is 512 MB
     )
 
 
