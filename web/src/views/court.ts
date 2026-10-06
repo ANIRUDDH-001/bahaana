@@ -10,7 +10,7 @@ export function renderCourt(s: AppState): string {
       <header><h2>${EXCUSE_LABEL[v.excuse]}</h2><span class="${stampClass(v.verdict)}">${v.verdict}</span></header>
       ${v.claimed ? `<p class="tag">Your usual excuse</p>` : ""}
       ${v.excuse === "tired" ? `<p class="note">${TIRED_NOTE}</p>` : ""}
-      <p><strong>Today:</strong> ${esc(sensitivityLine(v))}</p>
+      <p>${esc(sensitivityLine(v))}</p>
       <p><strong>Precedent:</strong> ${esc(evidenceLine(v))}</p>
       ${ci ? `<p class="fine">${esc(ci)}</p>` : ""}
     </article>`;
