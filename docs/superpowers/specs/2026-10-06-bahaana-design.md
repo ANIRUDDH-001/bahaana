@@ -351,7 +351,7 @@ no location" instead).
 | Piece | Service | Free-tier facts we design around |
 |---|---|---|
 | Static site + demo | Render Static Site | Free, served from a CDN, does not sleep |
-| TabPFN API | Render free web service | 512 MB RAM, 0.1 CPU, sleeps after 15 min idle, ~1 min to wake, 750 h/month |
+| TabPFN API | Hugging Face Docker Space (free CPU) | 2 vCPU, 16 GB RAM, sleeps after 48 h idle. Moved from Render free (512 MB) on 2026-10-06: one request peaked at 538 MB on Linux and Render restarted the service |
 | Weather, air, geocoding | Open-Meteo | Free for non-commercial use, no key |
 | Model weights | TabPFN v2 from Hugging Face | Prior Labs License (Apache 2.0 + attribution) |
 | Code | GitHub (user handles all git) | Free |

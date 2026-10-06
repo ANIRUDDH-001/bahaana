@@ -51,16 +51,17 @@ npm test                          # vitest
 For live mode locally, run the API (`uvicorn api.main:app --port 8765` with `FRONTEND_ORIGIN=http://localhost:5173`)
 and start Vite with `VITE_API_URL=http://localhost:8765`.
 
-## Deploy (Render, free tier)
+## Deploy (free tiers)
 
-`render.yaml` is a Render Blueprint with two services:
+- **Site**: `render.yaml` is a Render Blueprint for the static site built from `web/`. Set `VITE_API_URL` to the
+  model server's URL.
+- **Model server**: a Hugging Face Docker Space (free CPU: 2 vCPU, 16 GB). One TabPFN request peaks around
+  490–540 MB on Linux, above Render's free 512 MB, so the API doesn't run there. Build the Space folder with
+  `python scripts/make_space.py <your Space clone>`, then commit and push it. The Dockerfile allows
+  `https://bahaana.onrender.com` by default; set a `FRONTEND_ORIGIN` variable in the Space settings to change it.
 
-- **bahaana-api**: Python web service (free plan). Set `FRONTEND_ORIGIN` to the static site's URL.
-- **bahaana**: static site built from `web/`. Set `VITE_API_URL` to the API's URL.
-
-The demo is precomputed (`web/public/demo.json`), so the public link opens instantly even while the free API sleeps.
-`web/public/demo.json` is git-ignored until its owner agrees to publish their real step year; remove that line from
-`.gitignore` to ship it.
+The demo is precomputed (`web/public/demo.json`), so the public link opens instantly even while the free model server
+sleeps.
 
 ## How it works
 
