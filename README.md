@@ -55,10 +55,11 @@ and start Vite with `VITE_API_URL=http://localhost:8765`.
 
 - **Site**: `render.yaml` is a Render Blueprint for the static site built from `web/`. Set `VITE_API_URL` to the
   model server's URL.
-- **Model server**: a Hugging Face Docker Space (free CPU: 2 vCPU, 16 GB). One TabPFN request peaks around
-  490–540 MB on Linux, above Render's free 512 MB, so the API doesn't run there. Build the Space folder with
-  `python scripts/make_space.py <your Space clone>`, then commit and push it. The Dockerfile allows
-  `https://bahaana.onrender.com` by default; set a `FRONTEND_ORIGIN` variable in the Space settings to change it.
+- **Model server**: Modal (free Starter credits). One TabPFN request peaks around 490–540 MB on Linux, above
+  Render's free 512 MB, and Render's 0.1 CPU would take minutes per request, so the API doesn't run there.
+  `pip install modal`, `modal setup`, then from the repo root `modal deploy deploy/modal_app.py`. It prints the URL
+  to use as `VITE_API_URL`. The app allows `https://bahaana.onrender.com`; change `FRONTEND_ORIGIN` in
+  `deploy/modal_app.py` for another site.
 
 The demo is precomputed (`web/public/demo.json`), so the public link opens instantly even while the free model server
 sleeps.

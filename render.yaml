@@ -1,6 +1,6 @@
 services:
-  # The model server runs on a Hugging Face Space (deploy/hf-space): one TabPFN request peaks above
-  # Render's free 512 MB, measured on Linux. VITE_API_URL points the site at the Space.
+  # The model server runs on Modal (deploy/modal_app.py): one TabPFN request peaks above Render's
+  # free 512 MB, measured on Linux. VITE_API_URL points the site at the Modal URL.
   - type: web
     name: bahaana
     runtime: static
