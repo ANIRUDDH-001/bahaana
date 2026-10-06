@@ -151,7 +151,7 @@ input:focus-visible, select:focus-visible { outline-offset: 1px; }
 
 @media (min-width: 900px) {
   body[data-route="today"] main { max-width: 1040px; padding-top: 48px; }
-  .today { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); grid-template-areas: "score docket" "window docket" "go docket"; column-gap: 72px; align-items: start; }
+  .today { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); grid-template-areas: "score docket" "window docket" "go docket"; column-gap: 72px; align-items: start; margin-block: auto; }
   .today__docket { padding-top: 8px; }
   .verdicts { margin-top: 0; }
   .today__go { position: static; margin: 12px 0 0; padding: 0; background: none; }
