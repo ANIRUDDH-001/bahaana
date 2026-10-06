@@ -1,27 +1,6 @@
 services:
-  - type: web
-    name: bahaana-api
-    runtime: python
-    plan: free
-    buildCommand: pip install -r requirements.txt && python scripts/fetch_model.py
-    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT --no-access-log
-    healthCheckPath: /healthz
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
-      - key: PYTHONPATH
-        value: src:.
-      - key: TABPFN_MODEL_CACHE_DIR
-        value: /opt/render/project/src/models
-      - key: FRONTEND_ORIGIN
-        sync: false
-      # 0.1 CPU and 512 MB: extra threads and malloc arenas only add memory
-      - key: OMP_NUM_THREADS
-        value: "1"
-      - key: MKL_NUM_THREADS
-        value: "1"
-      - key: MALLOC_ARENA_MAX
-        value: "2"
+  # The model server runs on a Hugging Face Space (deploy/hf-space): one TabPFN request peaks above
+  # Render's free 512 MB, measured on Linux. VITE_API_URL points the site at the Space.
   - type: web
     name: bahaana
     runtime: static
