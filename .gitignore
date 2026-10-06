@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+models/*.ckpt
+data/raw/
+data/field/
+web/node_modules/
+web/dist/
+.env
+.superpowers/
