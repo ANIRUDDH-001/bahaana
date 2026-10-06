@@ -9,3 +9,5 @@ web/node_modules/
 web/dist/
 .env
 .superpowers/
+# Local preview only until the user consents to publishing their real year (spec §15.2); remove this line then.
+web/public/demo.json
